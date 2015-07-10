@@ -11,7 +11,6 @@ import (
 
 func TestRoundRobin(t *testing.T) {
 	p := loadbalancer.NewStaticPublisher([]endpoint.Endpoint{})
-	defer p.Stop()
 
 	lb := loadbalancer.RoundRobin(p)
 	if _, err := lb.Get(); err == nil {

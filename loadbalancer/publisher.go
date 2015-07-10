@@ -2,9 +2,10 @@ package loadbalancer
 
 import "github.com/go-kit/kit/endpoint"
 
-// Publisher produces endpoints.
+// Publisher provides access to a set of endpoints
+// that may change over time.
 type Publisher interface {
-	Subscribe(chan<- []endpoint.Endpoint)
-	Unsubscribe(chan<- []endpoint.Endpoint)
-	Stop()
+	// Endpoints returns the current endpoints.
+	// The caller should not mutate the returned slice.
+	Endpoints() []endpoint.Endpoint
 }

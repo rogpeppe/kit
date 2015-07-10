@@ -11,7 +11,6 @@ import (
 
 func TestRandom(t *testing.T) {
 	p := loadbalancer.NewStaticPublisher([]endpoint.Endpoint{})
-	defer p.Stop()
 
 	lb := loadbalancer.Random(p)
 	if _, err := lb.Get(); err == nil {

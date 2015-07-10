@@ -8,15 +8,17 @@ import (
 
 // Random returns a load balancer that yields random endpoints.
 func Random(p Publisher) LoadBalancer {
-	return random{newCache(p)}
+	return random{p}
 }
 
-type random struct{ *cache }
+type random struct {
+	p Publisher
+}
 
-func (r random) Count() int { return r.cache.count() }
+func (r random) Count() int { return len(r.p.Endpoints()) }
 
 func (r random) Get() (endpoint.Endpoint, error) {
-	endpoints := r.cache.get()
+	endpoints := r.p.Endpoints()
 	if len(endpoints) <= 0 {
 		return nil, ErrNoEndpointsAvailable
 	}

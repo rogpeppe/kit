@@ -8,27 +8,25 @@ import (
 
 // RoundRobin returns a load balancer that yields endpoints in sequence.
 func RoundRobin(p Publisher) LoadBalancer {
-	return &roundRobin{newCache(p), 0}
+	return &roundRobin{
+		p: p,
+	}
 }
 
 type roundRobin struct {
-	*cache
-	uint64
+	p     Publisher
+	count uint64
 }
 
-func (r *roundRobin) Count() int { return r.cache.count() }
+func (r *roundRobin) Count() int {
+	return len(r.p.Endpoints())
+}
 
 func (r *roundRobin) Get() (endpoint.Endpoint, error) {
-	endpoints := r.cache.get()
+	endpoints := r.p.Endpoints()
 	if len(endpoints) <= 0 {
 		return nil, ErrNoEndpointsAvailable
 	}
-	var old uint64
-	for {
-		old = atomic.LoadUint64(&r.uint64)
-		if atomic.CompareAndSwapUint64(&r.uint64, old, old+1) {
-			break
-		}
-	}
-	return endpoints[old%uint64(len(endpoints))], nil
+	count := atomic.AddUint64(&r.count, 1)
+	return endpoints[(count-1)%uint64(len(endpoints))], nil
 }
